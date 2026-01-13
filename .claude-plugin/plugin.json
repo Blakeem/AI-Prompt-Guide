@@ -1,0 +1,24 @@
+{
+  "name": "ai-prompt-guide",
+  "version": "1.0.0",
+  "description": "Structured workflows and agents for AI-assisted development: planning, decision-making, development patterns, and documentation",
+  "author": {
+    "name": "Blake McDonald",
+    "url": "https://github.com/Blakeem"
+  },
+  "homepage": "https://github.com/Blakeem/AI-Prompt-Guide",
+  "repository": "https://github.com/Blakeem/AI-Prompt-Guide",
+  "license": "MIT",
+  "keywords": [
+    "workflows",
+    "development",
+    "planning",
+    "decision-making",
+    "code-audit",
+    "tdd",
+    "agents",
+    "skills"
+  ],
+  "commands": "./.claude/commands/",
+  "skills": "./.claude/skills/"
+}
