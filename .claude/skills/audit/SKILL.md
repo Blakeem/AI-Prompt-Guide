@@ -1,6 +1,6 @@
 ---
 name: audit
-description: "Comprehensive code audit with parallel specialist agents. Use for production readiness review, PR review, or targeted quality analysis."
+description: "Comprehensive codebase-wide audit with parallel specialist agents. Use for full codebase scans, production readiness review, or multi-dimensional quality analysis. For focused review of specific files/changes, use code-reviewer agent instead."
 allowed-tools:
   - Read
   - Glob

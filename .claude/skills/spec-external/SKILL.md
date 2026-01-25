@@ -1,126 +1,56 @@
 ---
 name: spec-external
-description: "Document 3rd party APIs/components from official sources. Use when integrating SDKs, webhooks, auth flows, or documenting external service contracts."
+description: "Document 3rd party APIs from official sources. Use when integrating SDKs, webhooks, auth flows."
 allowed-tools:
   - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - WebFetch
-  - WebSearch
-  - TodoWrite
+  - Task
 ---
 
-# Workflow: Document External API Specification
+# Workflow: External API Documentation
 
 **Arguments:** $ARGUMENTS
 
-## [Research Phase]
+**Purpose:** Research and document external APIs using specialized subagents.
 
-1. **Identify authoritative sources**
-   - Official documentation
-   - API references
-   - RFCs if applicable
-   - Match runtime/environment versions
+## [RESEARCH]
 
-2. **Extract API contract from source documentation:**
-   - Capabilities and features
-   - Invariants and constraints
-   - Limits (rate limits, size limits, timeouts)
-   - Error semantics (codes, retry policies)
-   - Version compatibility gates
-   - Authentication requirements
+1. **Invoke api-spec-researcher agent**
 
-## [Documentation Phase]
+   ```
+   Task tool with:
+   - subagent_type: "general-purpose"
+   - model: sonnet
+   - prompt: |
+       Use the methodology from agents/api-spec-researcher.md
 
-3. **Create specification document with these sections:**
-   - API Overview
-   - Authentication
-   - Endpoints with signatures
-   - Request/response formats with examples
-   - Error conditions and handling
-   - Rate limits and quotas
-   - Version compatibility
+       Service: [from arguments]
+       Endpoints: [specific endpoints or "all"]
+       Output: docs/specs/[service-name]/raw-spec.md
+       Context: [how API will be used, if provided]
+   ```
 
-4. **Include for each endpoint:**
-   - HTTP method and path
-   - Request parameters
-   - Request body schema
-   - Response schema
-   - Error responses
-   - Example request/response
+   Agent researches official docs and creates raw specification.
 
-## [Acceptance Criteria]
+## [ORGANIZE]
 
-5. **Define acceptance criteria:**
-   - Happy path tests
-   - Edge cases (boundaries, limits)
-   - Error handling per specification
-   - Performance requirements (latency/throughput)
+2. **Invoke document-cleanup agent**
 
-## Specification Template
+   ```
+   Task tool with:
+   - subagent_type: "general-purpose"
+   - model: haiku
+   - prompt: |
+       Use the methodology from agents/document-cleanup.md
 
-```markdown
-# External API: [Service Name]
+       Input: docs/specs/[service-name]/raw-spec.md
+       Task: Split by endpoint, create _INDEX.md with keywords
+       Output: docs/specs/[service-name]/
+   ```
 
-## Overview
-- **Service:** [Name]
-- **Version:** [Version]
-- **Documentation:** [URL]
-- **Last Updated:** [Date]
+   Agent organizes docs for easy reference during development.
 
-## Authentication
-- **Method:** [OAuth2 / API Key / etc.]
-- **Header:** `Authorization: Bearer {token}`
-- **Scopes:** [List required scopes]
+## [REPORT]
 
-## Endpoints
-
-### [Endpoint Name]
-**`METHOD /path/to/endpoint`**
-
-**Request:**
-```json
-{
-  "field": "type - description"
-}
-```
-
-**Response (200):**
-```json
-{
-  "field": "type - description"
-}
-```
-
-**Errors:**
-| Code | Meaning | Handling |
-|------|---------|----------|
-| 400  | Bad request | Validate input |
-| 401  | Unauthorized | Refresh token |
-| 429  | Rate limited | Retry with backoff |
-
-## Rate Limits
-- **Requests:** X per minute
-- **Burst:** Y requests
-- **Retry-After:** Header included on 429
-
-## Version Compatibility
-- **Minimum version:** X.Y.Z
-- **Deprecation notes:** [Any deprecated features]
-
-## Acceptance Criteria
-- [ ] Authentication flow works
-- [ ] Happy path returns expected format
-- [ ] Rate limiting handled with backoff
-- [ ] Errors return expected codes
-```
-
-## Principles
-
-- Official docs are truth
-- Spec compliance before simplicity
-- Test against specification, not assumptions
-- Document version-specific behavior
-- Include real examples from official docs
+3. **Return completion**
+   - "Done: docs/specs/[service-name]/_INDEX.md"
+   - Or blockers if research/organization failed
