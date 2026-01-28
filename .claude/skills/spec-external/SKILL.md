@@ -12,16 +12,18 @@ allowed-tools:
 
 **Purpose:** Research and document external APIs using specialized subagents.
 
+**Role Context:** You are the **Orchestrating Agent**. The user is the **Product Owner** who needs API documentation for integration work.
+
 ## [RESEARCH]
 
-1. **Invoke api-spec-researcher agent**
+1. **Invoke api-researcher agent**
 
    ```
    Task tool with:
    - subagent_type: "general-purpose"
    - model: sonnet
    - prompt: |
-       Use the methodology from agents/api-spec-researcher.md
+       Use the methodology from agents/api-researcher.md
 
        Service: [from arguments]
        Endpoints: [specific endpoints or "all"]
@@ -33,14 +35,14 @@ allowed-tools:
 
 ## [ORGANIZE]
 
-2. **Invoke document-cleanup agent**
+2. **Invoke document-organizer agent**
 
    ```
    Task tool with:
    - subagent_type: "general-purpose"
    - model: haiku
    - prompt: |
-       Use the methodology from agents/document-cleanup.md
+       Use the methodology from agents/document-organizer.md
 
        Input: docs/specs/[service-name]/raw-spec.md
        Task: Split by endpoint, create _INDEX.md with keywords
@@ -51,6 +53,6 @@ allowed-tools:
 
 ## [REPORT]
 
-3. **Return completion**
+3. **Return completion to Product Owner**
    - "Done: docs/specs/[service-name]/_INDEX.md"
    - Or blockers if research/organization failed

@@ -1,6 +1,6 @@
 ---
 name: decide
-description: "Structured decision making using the decider agent. Use when weighing multiple approaches or options."
+description: "Structured decision making using the architect agent. Use when weighing multiple approaches or options."
 allowed-tools:
   - Read
   - Task
@@ -10,18 +10,20 @@ allowed-tools:
 
 **Arguments:** $ARGUMENTS
 
-**Purpose:** Invoke the `decider` agent for structured trade-off analysis.
+**Purpose:** Invoke the `architect` agent for structured trade-off analysis.
+
+**Role Context:** You are the **Orchestrating Agent**. The user is the **Product Owner** who may need to provide input on business requirements.
 
 ## Usage
 
-1. **Invoke decider agent**
+1. **Invoke architect agent**
 
    ```
    Task tool with:
    - subagent_type: "general-purpose"
    - model: sonnet
    - prompt: |
-       Use the methodology from agents/decider.md
+       Use the methodology from agents/architect.md
 
        Decision: [What we're deciding]
        Constraints: [Non-negotiable requirements]

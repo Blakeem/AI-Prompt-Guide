@@ -13,12 +13,14 @@ allowed-tools:
 
 **Arguments:** $ARGUMENTS
 
+**Role Context:** You are the **Orchestrating Agent** coordinating specialist audit agents. The user is the **Product Owner** who will review findings.
+
 ## [SETUP]
 
 1. **Define scope:**
    - **Full codebase:** Default - audit entire project
    - **Targeted:** Specific files, directories, PR diff, or component
-   - User provides scope or defaults to full
+   - Product Owner provides scope or defaults to full
 
 2. **Select issue types (3-6 recommended)**
    - Must include at least one from Essential
@@ -87,7 +89,7 @@ You are auditing code for [Issue Type] issues.
 
 ## Your Task
 
-Scan the codebase and document ALL findings:
+Scan the codebase and document significant findings:
 
 For each issue found:
 - **Location:** file:line

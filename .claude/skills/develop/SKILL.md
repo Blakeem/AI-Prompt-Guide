@@ -17,6 +17,8 @@ allowed-tools:
 
 **Purpose:** Gather information and create a plan for development work. This skill handles research and planning, NOT execution.
 
+**Role Context:** You are the **Orchestrating Agent**. The user is the **Product Owner** who provides requirements and approves plans.
+
 ## [GIT READINESS CHECK]
 
 1. **Check git status before proceeding**
@@ -54,7 +56,7 @@ allowed-tools:
 
 4. **Route uncertainties appropriately**
    - Research items → GATHER CONTEXT with targeted subagents
-   - Decision items → queue for DECISIONS phase (decider agent)
+   - Decision items → queue for DECISIONS phase (architect agent)
    - User items → queue for CLARIFY phase
 
 ## [GATHER CONTEXT]
@@ -64,7 +66,7 @@ allowed-tools:
    - Parallel exploration for independent areas
 
 6. **Research unknowns**
-   - Use `web-researcher` agent for external documentation
+   - Use `researcher` agent for external documentation
    - Read relevant files to understand existing patterns
 
 ## [INTEGRATION PLANNING] (when task involves external APIs/systems)
@@ -77,14 +79,14 @@ allowed-tools:
 
 ## [DECISIONS]
 
-8. **Use `decider` agent for decisions with trade-offs**
+8. **Use `architect` agent for decisions with trade-offs**
 
    ```
    Task tool with:
    - subagent_type: "general-purpose"
    - model: sonnet
    - prompt: |
-       Use the methodology from agents/decider.md
+       Use the methodology from agents/architect.md
 
        Decision: [What we're deciding]
        Constraints: [Non-negotiables]
@@ -93,7 +95,7 @@ allowed-tools:
 
 ## [CLARIFY]
 
-9. **Ask user questions after research**
+9. **Ask Product Owner questions after research**
    - Use `AskUserQuestion` tool to clarify requirements
    - Present options discovered during research
    - Confirm approach before planning

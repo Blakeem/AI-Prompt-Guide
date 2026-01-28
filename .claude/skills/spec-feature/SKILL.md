@@ -15,9 +15,11 @@ allowed-tools:
 
 **Arguments:** $ARGUMENTS
 
+**Role Context:** You are the **Orchestrating Agent**. The user is the **Product Owner** who defines requirements and priorities.
+
 ## [Requirements Phase]
 
-1. **Gather requirements**
+1. **Gather requirements from Product Owner**
    - Purpose and rationale
    - User behavior and interactions
    - Use cases (primary and secondary)
@@ -33,7 +35,7 @@ allowed-tools:
 
 **WHILE gaps exist:**
 
-3. **Ask user about:**
+3. **Ask Product Owner about:**
    - UX interactions
    - Specific requirements
    - Edge case handling
@@ -122,8 +124,8 @@ function name(params): returnType
 ## Principles
 
 **Decision Boundaries:**
-- User decides: UX, scope, priorities, business rules
-- Agent decides: Implementation, technical trade-offs (use `/decide`)
+- Product Owner decides: UX, scope, priorities, business rules
+- Architect decides: Implementation, technical trade-offs (use `/decide`)
 
 **Quality Standards:**
 - Unambiguous requirements

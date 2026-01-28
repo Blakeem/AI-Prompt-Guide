@@ -11,6 +11,8 @@ allowed-tools:
 
 **Arguments:** $ARGUMENTS
 
+**Role Context:** You are the **Orchestrating Agent**. The user is the **Product Owner** who will review and select designs.
+
 ## [SETUP]
 
 1. **Clarify the design problem**
@@ -20,12 +22,12 @@ allowed-tools:
 2. **Determine lenses (3-5)**
    - Lenses are design perspectives that focus each subagent's optimization criteria
    - Each parallel subagent receives ONE lens to optimize their design for
-   - User-provided lenses OR generate based on problem type
+   - Product Owner-provided lenses OR generate based on problem type
    - Examples: "minimal-clean", "feature-rich", "performance-first", "accessibility-focused", "mobile-first", "extensible", "coverage-focused"
 
 3. **Choose model based on complexity**
-   - **Large/architectural designs** → `opus-designer` agent
-   - **Component-level/iterative designs** → `sonnet-designer` agent
+   - **Large/architectural designs** → `senior-ux-developer` agent
+   - **Component-level/iterative designs** → `ux-developer` agent
 
 ## [PARALLEL GENERATION]
 
@@ -38,7 +40,7 @@ allowed-tools:
    - subagent_type: "general-purpose"
    - model: opus OR sonnet (based on step 3)
    - prompt: |
-       Use the methodology from agents/[opus|sonnet]-designer.md
+       Use the methodology from agents/[senior-ux-developer|ux-developer].md
 
        Lens: [Lens Name]
        Design Problem: [Description]
@@ -52,8 +54,8 @@ allowed-tools:
 
 ## [COLLECTION]
 
-5. **Present comparison to user for review**
+5. **Present comparison to Product Owner for review**
    - Summary of each variation and its lens optimization
    - Key differentiators between approaches
-   - Request user selection (or hybrid approach)
-   - User reviews the variations before selection
+   - Request Product Owner selection (or hybrid approach)
+   - Product Owner reviews the variations before selection

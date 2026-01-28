@@ -4,11 +4,12 @@ Structured workflows and specialized agents for AI-assisted development using Cl
 
 ## Philosophy
 
-This project uses a **multi-agent orchestration** approach:
+This project uses a **multi-agent orchestration** approach with agile role patterns:
 
-- **Main agent** handles planning, coordination, and quality gates
-- **Subagents** execute individual tasks and respond tersely (done/blockers)
+- **Orchestrating Agent** handles planning, coordination, and quality gates
+- **Subagents** (Developer, Code Reviewer, QA Verifier, etc.) execute individual tasks and respond tersely (done/blockers)
 - **Skills** are thin dispatchers that orchestrate subagents
+- **Product Owner** (user) provides requirements and makes business decisions
 - Context stays focused where needed instead of accumulated in one thread
 
 ## Quick Start
@@ -43,7 +44,7 @@ These commands are entry points for users to invoke workflows:
 |---------|-------------|
 | `/develop` | Start development planning workflow with context gathering, decisions, and execution plan |
 | `/brainstorm` | Generate 2-4 design variations using specialized design agents |
-| `/research` | Research topics using web-researcher agent with source verification |
+| `/research` | Research topics using researcher agent with source verification |
 | `/api-docs` | Document external APIs with endpoints, auth, errors, and rate limits |
 | `/audit` | Run parallel specialist agents for security, performance, complexity analysis |
 | `/decide` | Make structured decisions with trade-off evaluation |
@@ -74,19 +75,20 @@ Skills are workflows that orchestrate subagents. Some are user-facing, others ar
 
 ## Agents
 
-Specialized agents for different task types:
+Specialized agents for different agile roles:
 
-| Agent | Model | Purpose |
-|-------|-------|---------|
-| `sonnet-developer` | Sonnet | Standard development - features, bugs, tests, refactoring |
-| `opus-developer` | Opus | Complex/architectural work, intricate debugging |
-| `sonnet-designer` | Sonnet | Component-level design variations |
-| `opus-designer` | Opus | Large-scale architectural design |
-| `decider` | Sonnet/Opus | Structured decision-making between options |
-| `code-reviewer` | Sonnet | Focused review of specific files/changes |
-| `api-spec-researcher` | Sonnet | External API research and documentation |
-| `web-researcher` | Sonnet | General web research with source verification |
-| `document-cleanup` | Haiku | Document splitting and index generation |
+| Agent | Model | Role | Purpose |
+|-------|-------|------|---------|
+| `developer` | Sonnet | Developer | Standard development - features, bugs, tests, refactoring |
+| `senior-developer` | Opus | Senior Developer | Complex/architectural work, intricate debugging |
+| `ux-developer` | Sonnet | UX Developer | Component-level design variations |
+| `senior-ux-developer` | Opus | Senior UX Developer | Large-scale UX/frontend architecture |
+| `architect` | Sonnet/Opus | Architect | Structured decision-making between options |
+| `code-reviewer` | Sonnet | Code Reviewer | Code quality, security, maintainability review |
+| `qa-verifier` | Sonnet | QA Verifier | Acceptance criteria verification |
+| `api-researcher` | Sonnet | API Researcher | External API research and documentation |
+| `researcher` | Sonnet | Researcher | General web research with source verification |
+| `document-organizer` | Haiku | Document Organizer | Document splitting and index generation |
 
 ## Project Structure
 
@@ -112,28 +114,33 @@ AI-Prompt-Guide/
 │       ├── initiate-plan/
 │       └── initiate-plan-staged/
 ├── agents/               # Agent definitions
-│   ├── sonnet-developer.md
-│   ├── opus-developer.md
-│   ├── sonnet-designer.md
-│   ├── opus-designer.md
-│   ├── decider.md
+│   ├── developer.md
+│   ├── senior-developer.md
+│   ├── ux-developer.md
+│   ├── senior-ux-developer.md
+│   ├── architect.md
 │   ├── code-reviewer.md
-│   ├── api-spec-researcher.md
-│   ├── web-researcher.md
-│   └── document-cleanup.md
+│   ├── qa-verifier.md
+│   ├── api-researcher.md
+│   ├── researcher.md
+│   └── document-organizer.md
 ├── CLAUDE.md             # Project context for Claude
 └── README.md
 ```
 
 ## How It Works
 
-1. **User invokes a command** (e.g., `/develop add user authentication`)
+1. **Product Owner invokes a command** (e.g., `/develop add user authentication`)
 2. **Command directs to skill** which orchestrates the workflow
-3. **Skill spawns subagents** for specific tasks (research, development, review)
+3. **Skill spawns subagents** for specific tasks (research, development, review, QA)
 4. **Subagents respond tersely** ("done" or blockers) to minimize context
-5. **Main agent coordinates** quality gates and reports results
+5. **Orchestrating Agent coordinates** quality gates (Code Review + QA Verification) and reports results
 
-This approach keeps context focused - subagents only load the instructions they need, and the main agent stays lean for coordination.
+Every implementation goes through:
+- **Code Review** (mandatory) - quality, security, maintainability
+- **QA Verification** (mandatory) - acceptance criteria verification
+
+This approach keeps context focused - subagents only load the instructions they need, and the Orchestrating Agent stays lean for coordination.
 
 ## License
 

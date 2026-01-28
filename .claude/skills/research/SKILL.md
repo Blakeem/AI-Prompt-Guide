@@ -9,18 +9,20 @@ allowed-tools:
 
 **Arguments:** $ARGUMENTS
 
-**Purpose:** Research topics using the web-researcher agent.
+**Purpose:** Research topics using the researcher agent.
+
+**Role Context:** You are the **Orchestrating Agent**. The user is the **Product Owner** who needs information to make decisions.
 
 ## [RESEARCH]
 
-1. **Invoke web-researcher agent**
+1. **Invoke researcher agent**
 
    ```
    Task tool with:
    - subagent_type: "general-purpose"
    - model: sonnet
    - prompt: |
-       Use the methodology from agents/web-researcher.md
+       Use the methodology from agents/researcher.md
 
        Research topic: [from arguments]
        Focus: [specific questions if provided]
@@ -28,7 +30,7 @@ allowed-tools:
 
 ## [REPORT]
 
-2. **Return findings**
+2. **Return findings to Product Owner**
    - Research summary
    - Verified findings with sources
    - Unresolved questions

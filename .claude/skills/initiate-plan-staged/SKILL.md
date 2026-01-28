@@ -16,6 +16,8 @@ allowed-tools:
 
 **Purpose:** Execute multi-step development plans with git staging as quality gates between steps. After each step passes review, changes are staged so the next git diff only shows new changes.
 
+**Role Context:** You are the **Orchestrating Agent** coordinating Developer, Code Reviewer, and QA Verifier roles. The user is the **Product Owner**.
+
 ## [PRE-FLIGHT CHECK]
 
 1. **Verify git is ready**
@@ -23,7 +25,7 @@ allowed-tools:
    git status --porcelain
    ```
    - Working state should be clean OR only contain planned changes
-   - If unexpected changes exist, stop and report to user
+   - If unexpected changes exist, stop and report to Product Owner
 
 2. **Load current plan file**
    - Read the plan created by `/develop` skill
@@ -36,36 +38,36 @@ allowed-tools:
 
    ### a. Assign to Developer Subagent
 
-   **Simple/component work** → `sonnet-developer` agent:
+   **Simple/component work** → `developer` agent:
    ```
    Task tool with:
    - subagent_type: "general-purpose"
    - model: sonnet
    - prompt: |
-       Use the methodology from agents/sonnet-developer.md
+       Use the methodology from agents/developer.md
 
        Task: [Task description]
        Files: [Files to modify]
        Acceptance: [Criteria]
 
        Respond in terse mode: done/blockers only.
-       Do NOT stage changes - main agent handles staging.
+       Do NOT stage changes - Orchestrating Agent handles staging.
    ```
 
-   **Complex/architectural work** → `opus-developer` agent:
+   **Complex/architectural work** → `senior-developer` agent:
    ```
    Task tool with:
    - subagent_type: "general-purpose"
    - model: opus
    - prompt: |
-       Use the methodology from agents/opus-developer.md
+       Use the methodology from agents/senior-developer.md
 
        Task: [Task description]
        Files: [Files to modify]
        Acceptance: [Criteria]
 
        Respond in terse mode: done/blockers only.
-       Do NOT stage changes - main agent handles staging.
+       Do NOT stage changes - Orchestrating Agent handles staging.
    ```
 
    ### b. Handle New Files
@@ -76,32 +78,62 @@ allowed-tools:
    ```
    This marks intent-to-add so new files appear in `git diff` without staging content.
 
-   ### c. Review Changes via Git Diff
+   ### c. Code Review (Mandatory)
 
-   ```bash
-   git diff
+   Run `code-reviewer` on changes:
    ```
-   - Review output for production readiness
-   - Check for: correctness, security, maintainability, edge cases
-   - Using git diff minimizes context compared to reading full files
+   Task tool with:
+   - subagent_type: "general-purpose"
+   - model: sonnet
+   - prompt: |
+       Use the methodology from agents/code-reviewer.md
 
-   ### d. Fix Issues (if found)
+       Review changes shown in git diff.
+       Focus: [Production standards, security, maintainability]
+   ```
 
-   If review finds issues:
-   - Assign back to developer subagent with specific feedback
-   - Repeat review cycle until changes pass
-   - Loop continues until production ready
+   ### d. Handle Review Findings (Iteration Loop)
 
-   ### e. Stage Changes (Quality Gate)
+   **If FAIL or PASS WITH FIXES:**
+   - Assign required fixes back to Developer with specific feedback
+   - Developer addresses specific issues (no over-correction)
+   - Re-run code review
+   - Repeat until PASS
 
-   Once review passes:
+   **If PASS:**
+   - Proceed to QA verification
+
+   ### e. QA Verification
+
+   Run `qa-verifier` after code review passes:
+   ```
+   Task tool with:
+   - subagent_type: "general-purpose"
+   - model: sonnet
+   - prompt: |
+       Use the methodology from agents/qa-verifier.md
+
+       Acceptance criteria: [From task/plan]
+       Changed files: [List of files]
+
+       Verify implementation meets acceptance criteria.
+   ```
+
+   **If NOT MET or PARTIAL with blocking gaps:**
+   - Assign back to Developer with specific gaps
+   - After fix, re-run code review, then QA verification
+   - Repeat until VERIFIED
+
+   ### f. Stage Changes (Quality Gate)
+
+   Once both code review PASSES and QA VERIFIES:
    ```bash
    git add <files-modified-in-this-step>
    ```
-   **Main orchestrating agent stages changes** - this is the quality gate.
-   Subagents do NOT stage - only the main agent controls staging.
+   **Orchestrating Agent stages changes** - this is the quality gate.
+   Subagents do NOT stage - only the Orchestrating Agent controls staging.
 
-   ### f. Next Step
+   ### g. Next Step
 
    The next step's `git diff` now only shows its own changes.
    This prevents regression and keeps reviews focused.
@@ -113,17 +145,20 @@ allowed-tools:
 
 ## [REPORT]
 
-5. **Report summary after all steps complete**
+5. **Report summary to Product Owner after all steps complete**
    - Tasks completed
    - Blockers encountered
+   - Review status (all passed)
+   - QA verification status (all verified)
    - Files modified (now all staged)
    - Ready for commit message suggestion
 
 ## Important Notes
 
-- **Main agent = quality gatekeeper**: Only the main agent stages changes
+- **Orchestrating Agent = quality gatekeeper**: Only the Orchestrating Agent stages changes
 - **Subagents = workers**: They develop and respond terse, never stage
 - **Git diff = review tool**: Minimizes context vs reading file contents
 - **`git add -N`**: Makes new files visible in diff without committing content
 - **File isolation**: Prevent multiple subagents from editing same file simultaneously
 - **Staged changes persist**: Each step's staged changes are preserved for final commit
+- **Review is mandatory**: Every implementation gets code review AND QA verification
