@@ -2,16 +2,6 @@
 description: Document an internal feature specification.
 ---
 
-# Feature Specification
-
-Document an internal feature specification.
+Use the Skill tool to invoke `ai-prompt-guide:spec-feature` skill now. Wait for the skill to load before taking any other actions.
 
 **Arguments:** $ARGUMENTS
-
-Use the `/spec-feature` skill to define requirements before development.
-
-This will:
-1. Gather requirements through clarifying questions
-2. Define acceptance criteria
-3. Make technical decisions using the architect agent
-4. Create a specification document for development
