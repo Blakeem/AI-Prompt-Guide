@@ -1,3 +1,7 @@
+---
+description: Research topics using authoritative web sources.
+---
+
 # Research
 
 Research topics using authoritative web sources.

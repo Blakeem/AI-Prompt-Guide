@@ -1,3 +1,7 @@
+---
+description: Make a structured decision between options.
+---
+
 # Decide
 
 Make a structured decision between options.

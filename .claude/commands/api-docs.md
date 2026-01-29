@@ -1,3 +1,7 @@
+---
+description: Research and document external APIs.
+---
+
 # API Documentation
 
 Research and document external APIs.

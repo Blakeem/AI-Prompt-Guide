@@ -1,3 +1,7 @@
+---
+description: Generate design variations for your problem.
+---
+
 # Brainstorm
 
 Generate design variations for your problem.

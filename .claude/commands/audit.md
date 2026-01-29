@@ -1,3 +1,7 @@
+---
+description: Run a comprehensive codebase audit.
+---
+
 # Code Audit
 
 Run a comprehensive codebase audit.

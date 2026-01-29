@@ -1,3 +1,7 @@
+---
+description: Document an internal feature specification.
+---
+
 # Feature Specification
 
 Document an internal feature specification.
