@@ -1,6 +1,6 @@
 ---
-name: develop
-description: "Orchestrate development work from requirements to verified implementation. Delegates all work to subagents."
+name: develop-staged
+description: "Orchestrate complex development work with git staging as quality gates between steps. Use for multi-step tasks requiring checkpoints."
 allowed-tools:
   - Read
   - Glob
@@ -10,11 +10,17 @@ allowed-tools:
   - AskUserQuestion
 ---
 
-# Workflow: Development
+# Workflow: Development with Staged Quality Gates
 
 **Arguments:** $ARGUMENTS
 
-**Purpose:** Orchestrate development work from requirements through to verified implementation. This skill coordinates subagents but never implements directly.
+**Purpose:** Orchestrate complex, multi-step development work with git staging as quality gates between steps. After each step passes review, changes are staged so the next git diff only shows new changes.
+
+**When to use:** Choose `/develop-staged` over `/develop` when:
+- Task has multiple distinct steps/phases
+- You want rollback capability between steps
+- Changes are risky or architectural
+- You want focused code reviews (one step at a time)
 
 **Role Context:** You are the **Orchestrating Agent**. The user is the **Product Owner** who provides requirements and approves significant work.
 
@@ -39,17 +45,21 @@ The Orchestrating Agent coordinates but NEVER implements directly. All work flow
 
 ---
 
-## [GIT READINESS CHECK]
+## [PRE-FLIGHT CHECK]
 
-1. **Check git status before proceeding**
-   - Run `git rev-parse --is-inside-work-tree` to check if this is a git repo
-   - Run `git status --porcelain` to check for uncommitted changes
+1. **Verify git is ready**
+   ```bash
+   git status --porcelain
+   ```
+   - Working state should be clean OR only contain planned changes
+   - If unexpected uncommitted changes exist, use `AskUserQuestion` to ask Product Owner how to proceed
 
-2. **Handle git state**
-   - If NOT a git repo and task appears complex (multi-step, architectural changes):
-     - Use `AskUserQuestion`: "This isn't a git repo. Would you like to initialize git for change tracking? (Recommended for complex work)"
+2. **Check if this is a git repo**
+   - Run `git rev-parse --is-inside-work-tree`
+   - If NOT a git repo:
+     - Use `AskUserQuestion`: "This isn't a git repo. Staged development requires git for checkpoints. Initialize git?"
      - If yes: run `git init`
-   - If there ARE uncommitted changes: note this for reporting
+     - If no: suggest using `/develop` instead
 
 ## [ASSESS REQUIREMENTS]
 
@@ -78,6 +88,11 @@ The Orchestrating Agent coordinates but NEVER implements directly. All work flow
    - Decision items → DECISIONS phase (architect agent)
    - User items → CLARIFY phase
 
+5. **Break work into logical steps**
+   - Each step should be independently reviewable and committable
+   - Identify files each step will modify (to prevent conflicts)
+   - Steps execute sequentially; tasks within a step can be parallel
+
 ## [GATHER CONTEXT] (Conditional)
 
 **Research Depth Principle:**
@@ -87,7 +102,7 @@ Research should be proportional to task unfamiliarity, not task size.
 - "Add a button" → no research needed
 - "Implement WebAuthn passwordless login" → research likely needed (security-critical, evolving standards)
 
-5. **Only spawn exploration/research subagents when:**
+6. **Only spawn exploration/research subagents when:**
    - Task involves unfamiliar technologies
    - External APIs/systems need investigation
    - Newer tools/libraries (recent releases) might exist for the task
@@ -99,14 +114,14 @@ Research should be proportional to task unfamiliarity, not task size.
    - Familiar patterns and technologies
    - Simple modifications to existing code
 
-6. **When research IS needed:**
+7. **When research IS needed:**
    - Use `Task` tool with Explore agents to explore codebase
    - Use `researcher` agent for external documentation
    - Read relevant files to understand existing patterns
 
 ## [INTEGRATION PLANNING] (when task involves external APIs/systems)
 
-7. **For integration work, apply Spec-First methodology:**
+8. **For integration work, apply Spec-First methodology:**
    - Map entry points: candidate integration surfaces
    - Choose sync vs async by latency/throughput/ordering needs
    - Propose 2-4 compliant designs; prefer smallest solution meeting all constraints
@@ -114,7 +129,7 @@ Research should be proportional to task unfamiliarity, not task size.
 
 ## [DECISIONS]
 
-8. **Use `architect` agent for decisions with trade-offs**
+9. **Use `architect` agent for decisions with trade-offs**
 
    ```
    Task tool with:
@@ -127,16 +142,18 @@ Research should be proportional to task unfamiliarity, not task size.
 
 ## [CLARIFY]
 
-9. **Ask Product Owner questions when needed**
-   - Use `AskUserQuestion` tool to clarify business requirements
-   - Present options discovered during research
-   - Focus on product decisions, not technical implementation details
+10. **Ask Product Owner questions when needed**
+    - Use `AskUserQuestion` tool to clarify business requirements
+    - Present options discovered during research
+    - Focus on product decisions, not technical implementation details
 
-## [EXECUTE TASKS]
+## [EXECUTE STEPS]
 
-10. **Assign tasks to subagents based on complexity**
+**For each step in the plan:**
 
-    **Simple/component work** → `developer` agent:
+### a. Assign to Developer Subagent
+
+11. **Simple/component work** → `developer` agent:
     ```
     Task tool with:
     - subagent_type: "ai-prompt-guide:developer"
@@ -146,6 +163,7 @@ Research should be proportional to task unfamiliarity, not task size.
         Acceptance: [Criteria]
 
         Respond in terse mode: done/blockers only.
+        Do NOT stage changes - Orchestrating Agent handles staging.
     ```
 
     **Complex/architectural work** → `senior-developer` agent:
@@ -158,42 +176,43 @@ Research should be proportional to task unfamiliarity, not task size.
         Acceptance: [Criteria]
 
         Respond in terse mode: done/blockers only.
+        Do NOT stage changes - Orchestrating Agent handles staging.
     ```
 
-11. **Respect task dependencies**
-    - Run independent tasks in parallel
-    - Wait for dependencies before starting dependent tasks
+### b. Handle New Files
 
-## [CODE REVIEW] (Mandatory)
+12. **For any new files created by the subagent:**
+    ```bash
+    git add -N <new-file>
+    ```
+    This marks intent-to-add so new files appear in `git diff` without staging content.
 
-**Every implementation gets reviewed.** This is not optional.
+### c. Code Review (Mandatory)
 
-12. **Run `code-reviewer` after implementation**
+13. **Run `code-reviewer` on this step's changes:**
 
     ```
     Task tool with:
     - subagent_type: "ai-prompt-guide:code-reviewer"
     - prompt: |
-        Review files: [List of changed files]
+        Review changes shown in git diff.
         Focus: [Production standards, security, maintainability]
     ```
 
-13. **Handle review findings with iteration loop**
+### d. Handle Review Findings (Iteration Loop)
 
-    **If FAIL or PASS WITH FIXES:**
-    - Assign required fixes back to appropriate Developer agent
-    - Developer addresses specific issues raised (no over-correction)
+14. **If FAIL or PASS WITH FIXES:**
+    - Assign required fixes back to Developer with specific feedback
+    - Developer addresses specific issues (no over-correction)
     - Re-run code review
     - Repeat until PASS
 
     **If PASS:**
     - Proceed to QA verification
 
-    Optional improvements: note for Product Owner follow-up.
+### e. QA Verification
 
-## [QA VERIFICATION] (Mandatory)
-
-14. **Run `qa-verifier` after code review passes**
+15. **Run `qa-verifier` after code review passes:**
 
     ```
     Task tool with:
@@ -202,26 +221,54 @@ Research should be proportional to task unfamiliarity, not task size.
         Acceptance criteria: [From task/requirements]
         Changed files: [List of files]
 
-        Verify implementation meets all acceptance criteria.
+        Verify implementation meets acceptance criteria.
     ```
 
-15. **Handle verification results**
-
     **If NOT MET or PARTIAL with blocking gaps:**
-    - Identify which criteria failed
     - Assign back to Developer with specific gaps
     - After fix, re-run code review, then QA verification
     - Repeat until VERIFIED
 
-    **If VERIFIED:**
-    - Task is complete
+### f. Stage Changes (Quality Gate)
+
+16. **Once both code review PASSES and QA VERIFIES:**
+    ```bash
+    git add <files-modified-in-this-step>
+    ```
+    **Orchestrating Agent stages changes** - this is the quality gate.
+    Subagents do NOT stage - only the Orchestrating Agent controls staging.
+
+### g. Next Step
+
+17. **The next step's `git diff` now only shows its own changes.**
+    This prevents regression and keeps reviews focused.
+
+## [PARALLEL EXECUTION RULES]
+
+18. **Within a single step:**
+    - Run independent tasks in parallel when files don't overlap
+    - **Critical:** Divide work so subagents don't work on same files simultaneously
+
+19. **Between steps:**
+    - Steps execute sequentially (each step depends on previous staging)
+    - Wait for step N to complete and stage before starting step N+1
 
 ## [REPORT]
 
-16. **Report summary to Product Owner**
-    - Tasks completed
+20. **Report summary to Product Owner after all steps complete**
+    - Steps completed
     - Blockers encountered (if any)
     - Review status (all passed)
     - QA verification status (all verified)
-    - Files modified
+    - Files modified (now all staged)
     - Ready for commit (suggest `/commit` if appropriate)
+
+## Important Notes
+
+- **Orchestrating Agent = quality gatekeeper**: Only the Orchestrating Agent stages changes
+- **Subagents = workers**: They develop and respond terse, never stage
+- **Git diff = review tool**: Minimizes context vs reading file contents
+- **`git add -N`**: Makes new files visible in diff without committing content
+- **File isolation**: Prevent multiple subagents from editing same file simultaneously
+- **Staged changes persist**: Each step's staged changes are preserved for final commit
+- **Review is mandatory**: Every implementation gets code review AND QA verification
