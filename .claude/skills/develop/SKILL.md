@@ -81,18 +81,6 @@ Every action that modifies the codebase MUST be delegated to a subagent:
 
 ---
 
-## [GIT READINESS CHECK]
-
-1. **Check git status before proceeding**
-   - Run `git rev-parse --is-inside-work-tree` to check if this is a git repo
-   - Run `git status --porcelain` to check for uncommitted changes
-
-2. **Handle git state**
-   - If NOT a git repo and task appears complex (multi-step, architectural changes):
-     - Use `AskUserQuestion`: "This isn't a git repo. Would you like to initialize git for change tracking? (Recommended for complex work)"
-     - If yes: run `git init`
-   - If there ARE uncommitted changes: note this for reporting
-
 ## [ASSESS REQUIREMENTS]
 
 3. **Identify what is known vs unknown**

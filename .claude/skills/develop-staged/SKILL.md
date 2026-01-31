@@ -87,7 +87,7 @@ Every action that modifies the codebase MUST be delegated to a subagent:
 
 ---
 
-## [PRE-FLIGHT CHECK]
+## [PRE-FLIGHT GIT READINESS CHECK]
 
 1. **Verify git is ready**
    ```bash
